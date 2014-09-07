@@ -65,7 +65,8 @@ class HumanFinder:
         if self.show:
             if self.color_map_end == None: color_map_end = max(blobs.area())
             if self.color_map_start == None: color_map_start = min(blobs.area())
-            return ColorMap(startcolor=self.cm_start_color, endcolor=self.cm_end_color, startmap=min(blobs.area()), endmap=color_map_end)
+            #return ColorMap(startcolor=self.cm_start_color, endcolor=self.cm_end_color, startmap=min(blobs.area()), endmap=color_map_end)
+            return ColorMap(color=self.cm_start_color, startmap=min(blobs.area()), endmap=color_map_end)
 
     def drawImage(self):
         ''' Draw self.img on the screen. Disabled if show=False. '''
