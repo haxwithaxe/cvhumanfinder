@@ -2,7 +2,7 @@ from SimpleCV import *
 import time
 
 class HumanFinder:
-    def __init__(self, motion=False, motion_delay=0.25, color_map_start_color=Color.RED, color_map_end_color=Color.BLUE, color_map_start=None, color_map_end=None, background=None, show=False):
+    def __init__(self, motion=False, motion_delay=0.50, color_map_start_color=Color.RED, color_map_end_color=Color.BLUE, color_map_start=None, color_map_end=None, background=None, show=False):
         ''' 
         @param  motion                  Boolean, if true use motion detection. Default:False
         @param  motion_delay            Float, number of seconds to wait inbetween capturing image pairs.
@@ -55,6 +55,7 @@ class HumanFinder:
         # draw colorized blobs
         if self.show:
             for blob in blobs:
+               # This eventually throws a division by zero error in Color.py while calculating colordistance
                blob.draw(color_map[blob.area()])
 
     def getColorMap(self, blobs):
