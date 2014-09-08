@@ -2,7 +2,7 @@ from SimpleCV import *
 import time
 
 class HumanFinder:
-    def __init__(self, motion=False, motion_delay=0.25, color_map_start_color=Color.RED, color_map_end_color=Color.BLUE, color_map_start=None, color_map_end=None, background=None, show=False):
+    def __init__(self, motion=False, motion_delay=0.50, color_map_start_color=Color.RED, color_map_end_color=Color.BLUE, color_map_start=None, color_map_end=None, background=None, show=False):
         ''' 
         @param  motion                  Boolean, if true use motion detection. Default:False
         @param  motion_delay            Float, number of seconds to wait inbetween capturing image pairs.
@@ -55,6 +55,7 @@ class HumanFinder:
         # draw colorized blobs
         if self.show:
             for blob in blobs:
+               # This eventually throws a division by zero error in Color.py while calculating colordistance
                blob.draw(color_map[blob.area()])
 
     def getColorMap(self, blobs):
@@ -65,7 +66,8 @@ class HumanFinder:
         if self.show:
             if self.color_map_end == None: color_map_end = max(blobs.area())
             if self.color_map_start == None: color_map_start = min(blobs.area())
-            return ColorMap(startcolor=self.cm_start_color, endcolor=self.cm_end_color, startmap=min(blobs.area()), endmap=color_map_end)
+            #return ColorMap(startcolor=self.cm_start_color, endcolor=self.cm_end_color, startmap=min(blobs.area()), endmap=color_map_end)
+            return ColorMap(color=self.cm_start_color, startmap=min(blobs.area()), endmap=color_map_end)
 
     def drawImage(self):
         ''' Draw self.img on the screen. Disabled if show=False. '''
