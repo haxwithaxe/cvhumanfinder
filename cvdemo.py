@@ -23,23 +23,27 @@ class HumanFinder:
         self.color_map_end = color_map_end
         self.cm_end_color = Color.BLUE
         self.show = show
+        #self.mask = self.cam.getImage().grayscale()
+
+    def _pre_process_img(self, img):
+        return (img.binarize().invert() - img.skeletonize())
 
     def getImage(self):
         ''' Get the image from a camera '''
         # if self.motion is True use a time seperated composite image
         if self.use_motion:
             # if self.motion is True use a time separated composite image
-            self.getMotionImage()
+            self.img = self._pre_process_img(self.getMotionImage())
         else:
             # otherwise just grab an image from the camera
-            self.img = self.cam.getImage()
+            self.img = self._pre_process_img(self.cam.getImage())
 
     def getMotionImage(self):
         ''' Get a time separated composite image that shows only things that are different between the two. '''
         img0 = self.cam.getImage()
         time.sleep(self.motion_delay)
         img1 = self.cam.getImage()
-        self.img = img0-img1
+        return img0-img1
 
     def getBlobs(self):
         ''' Get blobs from self.img
@@ -56,7 +60,13 @@ class HumanFinder:
         if self.show:
             for blob in blobs:
                # This eventually throws a division by zero error in Color.py while calculating colordistance
-               blob.draw(color_map[blob.area()])
+                ba = blob.area()
+                if ba > color_map.startmap:
+                    cm = color_map[ba]
+                    blob.draw(cm)
+
+    def find_humans(self):
+        pass
 
     def getColorMap(self, blobs):
         ''' Generate a ColorMap based on the blobs found
@@ -64,10 +74,16 @@ class HumanFinder:
         @returns            ColorMap object or None if disabled
         '''
         if self.show:
-            if self.color_map_end == None: color_map_end = max(blobs.area())
-            if self.color_map_start == None: color_map_start = min(blobs.area())
-            #return ColorMap(startcolor=self.cm_start_color, endcolor=self.cm_end_color, startmap=min(blobs.area()), endmap=color_map_end)
-            return ColorMap(color=self.cm_start_color, startmap=min(blobs.area()), endmap=color_map_end)
+            if self.color_map_end == None:
+                color_map_end = max(blobs.area())
+            else:
+                color_map_end = self.color_map_end
+            if self.color_map_start == None:
+                color_map_start = min(blobs.area())
+            else:
+                color_map_start = self.color_map_start
+            print(color_map_start)
+            return ColorMap(color=self.cm_start_color, startmap=color_map_start, endmap=color_map_end)
 
     def drawImage(self):
         ''' Draw self.img on the screen. Disabled if show=False. '''
@@ -90,5 +106,5 @@ class HumanFinder:
             self.drawImage()
 
 if __name__ == '__main__':
-    hf = HumanFinder(motion=True, show=True)
+    hf = HumanFinder(motion=False, show=True)
     hf.on_start()
