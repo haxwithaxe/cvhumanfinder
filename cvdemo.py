@@ -71,11 +71,11 @@ class HumanFinder:
         # draw colorized blobs
         if self.show:
             for blob in blobs:
-               # This eventually throws a division by zero error in Color.py while calculating colordistance
                 ba = blob.area()
                 if ba > color_map.startmap:
                     try:
                         cm = color_map[ba]
+			# This throws a no such method on draw() if the field is all black/dark
                         blob.draw(cm)
                     except: #DivideByZeroError as e:
                         pass
