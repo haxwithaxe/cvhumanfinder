@@ -1,7 +1,9 @@
 import SimpleHTTPServer
 import SocketServer
 import sys
+import json
 import logging
+from SimpleCV import Image
 import humanfinder
 from humanfinder import FakeCamera
 
@@ -13,7 +15,7 @@ except ImportError:
 PORT = int(sys.argv[1], 10)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('http')
-hf_args = {'show':False, 'clean_plate':FakeCamera().clean_plate()}
+hf_args = {'show':False, 'clean_plate':Image('clean_plate.png')}
 hf = humanfinder.HFHandler.start(**hf_args)
 
 class HumansFound(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -23,7 +25,7 @@ class HumansFound(SimpleHTTPServer.SimpleHTTPRequestHandler):
         reply = hf.ask({'sample':0})
         logger.debug('replying: %s' % reply)
         f = StringIO()
-        f.write(str(reply))
+	f.write(json.dumps({'data':reply}))
         length = f.tell()
         f.seek(0)
         self.send_response(200)

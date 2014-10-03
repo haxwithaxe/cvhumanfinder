@@ -20,13 +20,13 @@ class HumanFinder(pykka.ThreadingActor):
         super(HumanFinder, self).__init__()
         self.parent = parent
         self.motion_update = motion
-        self.show = show
+        self._show = show
         self.blob_min_radius = blob_min_radius
         self.motion_min_radius = motion_min_radius
         self.max_1_meatbag_area = max_1_meatbag_area/100.0
         self.clean_plate = clean_plate
         self.min_motion_buffer_len = min_motion_buffer_len
-        self.cam = FakeCamera()
+	self.cam = Camera(0, {"width":320, "height":320})
         self.img = None
         self.last_img = None
         self.cm_colors = (Color.RED,(128,0,0),(128,128,0),(0,255,0),(0,128,128),(0,0,128),Color.BLUE)
@@ -51,10 +51,10 @@ class HumanFinder(pykka.ThreadingActor):
             self.last_img = self.img
             self.recalibrate()
         # otherwise just grab an image from the camera
-        self.img = self._pre_process_img(self.cam.getImage())
-        if self.show:
-            self.img.show()
-            raw_input()
+	i=self.cam.getImage()
+        #self.img = self._pre_process_img(self.cam.getImage())
+        self.show(i)
+	self.img = self._pre_process_img(i)
         logger.debug('getImage')
 
     def seesMotion(self):
@@ -74,9 +74,7 @@ class HumanFinder(pykka.ThreadingActor):
         logger.debug('getBlobs')
         mask = self.img.threshold(magic_threshold).dilate(magic_dialate)
         blobs = self.img.findBlobsFromWatershed(mask)
-        if self.show:
-            blobs.show()
-            raw_input()
+        self.show(blobs)
         return blobs
 
     def drawBlobs(self, blobs, color_map):
@@ -86,7 +84,7 @@ class HumanFinder(pykka.ThreadingActor):
         '''
         logger.debug('drawBlobs')
         # draw colorized blobs
-        if self.show:
+        if self._show:
             logger.debug('show == True, drawing blobs, count %d' % len(blobs))
             for blob in blobs:
                # This eventually throws a division by zero error in Color.py while calculating colordistance
@@ -104,7 +102,7 @@ class HumanFinder(pykka.ThreadingActor):
         @returns            ColorMap object or None if disabled
         '''
         logger.debug('getColorMap')
-        if self.show:
+        if self._show:
             logger.debug('show == True, getting color map')
             color_map_end = max(blobs.area())
             color_map_start = min(blobs.area())
@@ -113,10 +111,7 @@ class HumanFinder(pykka.ThreadingActor):
     def drawImage(self):
         ''' Draw self.img on the screen. Disabled if show=False. '''
         logger.debug('drawImage')
-        if self.show:
-            logger.debug('show == True, drawing image')
-            self.img.show()
-            raw_input()
+        self.show(self.img)
 
     def on_start(self):
         ''' Main loop 
@@ -131,14 +126,14 @@ class HumanFinder(pykka.ThreadingActor):
             self.getImage()
             # find blobs
             blobs = self.getBlobs()
-            blobs_big = [x for x in blobs if x.radius() > self.blob_min_radius]
+            blobs_big = [x for x in blobs if x.radius() > self.blob_min_radius and x.area()/self.img.area() < 0.80]
             if blobs_big:
                 # make color map
-                if self.show:
+                if self._show:
                     color_map = self.getColorMap(blobs)
                     # draw colorized blobs
                     self.drawBlobs(blobs, color_map)
-            if self.show:
+            if self._show:
                 # make teh pretty pictures
                 self.drawImage()
             logger.info('big blob count: %d of %d' % (len(blobs_big), len(blobs)))
@@ -165,6 +160,12 @@ class HumanFinder(pykka.ThreadingActor):
                 self.clean_plate = self.cam.getImage()
             else:
                 self.motion_buffer+=1
+
+    def show(self, img):
+	    if self._show:
+		img.show()
+		print('press enter ...')
+		raw_input()
 
 class FakeCamera(object):
 
@@ -214,6 +215,6 @@ class HFHandler(pykka.ThreadingActor):
 
 
 if __name__ == '__main__':
-    hf = HFHandler.start(show=True, clean_plate=FakeCamera().clean_plate())
+    hf = HFHandler.start(show=True, clean_plate=Image('clean_plate.png'))
     time.sleep(30)
     logger.info('sample: %s' % hf.ask({'a':'A'}))
