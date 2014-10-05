@@ -5,6 +5,6 @@ cam = Camera(*humanfinder.conf.camera_args)
 
 img = cam.getImage()
 
-img.save(humanfinder.conf.clean_plate_name,temp=False)
+img.save(humanfinder.conf.clean_plate,temp=False)
 
 
