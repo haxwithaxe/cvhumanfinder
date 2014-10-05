@@ -1,9 +1,10 @@
 from SimpleCV import *
+import humanfinder
 
-cam = Camera(0, {'width':320, 'height':320})
+cam = Camera(*humanfinder.conf.camera_args)
 
 img = cam.getImage()
 
-print(img.save(temp=True))
+img.save(humanfinder.conf.clean_plate_name,temp=False)
 
 

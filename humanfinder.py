@@ -26,7 +26,7 @@ class HumanFinder(pykka.ThreadingActor):
         self.max_1_meatbag_area = max_1_meatbag_area/100.0
         self.clean_plate = clean_plate
         self.min_motion_buffer_len = min_motion_buffer_len
-	self.cam = Camera(0, {"width":320, "height":320})
+	self.cam = Camera(*conf.camera_args)
         self.img = None
         self.last_img = None
         self.cm_colors = (Color.RED,(128,0,0),(128,128,0),(0,255,0),(0,128,128),(0,0,128),Color.BLUE)
@@ -167,21 +167,18 @@ class HumanFinder(pykka.ThreadingActor):
 		print('press enter ...')
 		raw_input()
 
-class FakeCamera(object):
+class conf(object):
 
-    _clean_plate = 'clean_plate.jpg'
-    img_path = 'sample-2.jpg'
-    scale_y = 480
-    scale_x = 600
+    clean_plate_name = 'clean_plate'
+    clean_plate_ext = '.jpg'
+    scale_y = 0
+    scale_x = 0
+    camera_args = []
 
+    @property
     def clean_plate(self):
-        logger.debug('clean_plate')
-        logger.debug('self._clean_plate: %s' % self._clean_plate)
-        return Image(self._clean_plate).scale(self.scale_x, self.scale_y)
+        return '%s%s' % (self.clean_plate_name,self.clean_plate_ext)
 
-    def getImage(self):
-        logger.debug('getImage')
-        return Image(self.img_path).scale(self.scale_x, self.scale_y)
 
 class HFHandler(pykka.ThreadingActor):
 
@@ -215,6 +212,6 @@ class HFHandler(pykka.ThreadingActor):
 
 
 if __name__ == '__main__':
-    hf = HFHandler.start(show=True, clean_plate=Image('clean_plate.png'))
+    hf = HFHandler.start(show=True, clean_plate=Image(conf.clean_plate))
     time.sleep(30)
     logger.info('sample: %s' % hf.ask({'a':'A'}))

@@ -15,7 +15,7 @@ except ImportError:
 PORT = int(sys.argv[1], 10)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('http')
-hf_args = {'show':False, 'clean_plate':Image('clean_plate.png')}
+hf_args = {'show':False, 'clean_plate':Image(humanfinder.conf.clean_plate)}
 hf = humanfinder.HFHandler.start(**hf_args)
 
 class HumansFound(SimpleHTTPServer.SimpleHTTPRequestHandler):
