@@ -169,15 +169,15 @@ class HumanFinder(pykka.ThreadingActor):
 
 class conf(object):
 
-    clean_plate_name = 'clean_plate'
-    clean_plate_ext = '.jpg'
+    clean_plate_name = u'clean_plate'
+    clean_plate_ext = u'.jpg'
     scale_y = 0
     scale_x = 0
     camera_args = []
 
     @property
     def clean_plate(self):
-        return '%s%s' % (self.clean_plate_name,self.clean_plate_ext)
+        return u'%s%s' % (self.clean_plate_name,self.clean_plate_ext)
 
 
 class HFHandler(pykka.ThreadingActor):
