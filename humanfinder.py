@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from SimpleCV import *
 import pykka
 import time
@@ -26,12 +27,12 @@ class HumanFinder(pykka.ThreadingActor):
         self.max_1_meatbag_area = max_1_meatbag_area/100.0
         self.clean_plate = clean_plate
         self.min_motion_buffer_len = min_motion_buffer_len
-	self.cam = Camera(*conf.camera_args)
+        self.cam = Camera(*Conf().camera_args)
         self.img = None
         self.last_img = None
         self.cm_colors = (Color.RED,(128,0,0),(128,128,0),(0,255,0),(0,128,128),(0,0,128),Color.BLUE)
         self.recalibrate_interval = 60 # minutes
-        self.recalibrated_last = time.time()
+        self.recalibrated_last = int(time.time())
         self.motion_buffer = 0
         self._count_buffer = []
         self.thread_delay = 1
@@ -39,6 +40,8 @@ class HumanFinder(pykka.ThreadingActor):
 
     def _pre_process_img(self, img):
         ''' do things to the image before sending it through the blob finders '''
+        print('clean_plate.jpg size: %s' % str(self.clean_plate.size()))
+        print ('About to diff greyscaled caps...')
         logger.debug('pre-processing image: %s, %s' % (img, self.clean_plate))
         return (self.clean_plate.grayscale() - img.grayscale())
 
@@ -51,10 +54,11 @@ class HumanFinder(pykka.ThreadingActor):
             self.last_img = self.img
             self.recalibrate()
         # otherwise just grab an image from the camera
-	i=self.cam.getImage()
-        #self.img = self._pre_process_img(self.cam.getImage())
+        i=self.cam.getImage()
+        self.img = self._pre_process_img(self.cam.getImage())
         self.show(i)
-	self.img = self._pre_process_img(i)
+        print('Image i size: %s' % str(i.size()))
+        self.img = self._pre_process_img(i)
         logger.debug('getImage')
 
     def seesMotion(self):
@@ -87,7 +91,6 @@ class HumanFinder(pykka.ThreadingActor):
         if self._show:
             logger.debug('show == True, drawing blobs, count %d' % len(blobs))
             for blob in blobs:
-               # This eventually throws a division by zero error in Color.py while calculating colordistance
                 ba = blob.area()
                 if ba > color_map.startmap:
                     try:
@@ -114,7 +117,7 @@ class HumanFinder(pykka.ThreadingActor):
         self.show(self.img)
 
     def on_start(self):
-        ''' Main loop 
+        ''' Main loop
             named with the intent of making this module a pykka.Actor
         '''
         logger.debug('main loop')
@@ -149,14 +152,14 @@ class HumanFinder(pykka.ThreadingActor):
             logger.debug('meatbags: %d' % count)
 
     def recalibrate(self):
-        if time.time() - self.recalibrated_last > 60*60:
+        if int(time.time()) - self.recalibrated_last > 60*60:
             if self.seesMotion():
                 # we see movement so we'll try again later
                 self.motion_buffer = 0
                 return None
             elif self.motion_buffer >= self.buffer_len:
                 self.motion_buffer=0
-                self.recalibrated_last = time.time()
+                self.recalibrated_last = int(time.time())
                 self.clean_plate = self.cam.getImage()
             else:
                 self.motion_buffer+=1
@@ -167,17 +170,17 @@ class HumanFinder(pykka.ThreadingActor):
 		print('press enter ...')
 		raw_input()
 
-class conf(object):
+class Conf(object):
 
-    clean_plate_name = u'clean_plate'
-    clean_plate_ext = u'.jpg'
+    clean_plate_name = 'clean_plate'
+    clean_plate_ext = '.jpg'
     scale_y = 0
     scale_x = 0
-    camera_args = []
+    # if more than one cam device give it an index; set w and h
+    camera_args = [1, {"width":960, "height":720}]
 
-    @property
     def clean_plate(self):
-        return u'%s%s' % (self.clean_plate_name,self.clean_plate_ext)
+        return '%s%s' % (self.clean_plate_name, self.clean_plate_ext)
 
 
 class HFHandler(pykka.ThreadingActor):
@@ -212,6 +215,7 @@ class HFHandler(pykka.ThreadingActor):
 
 
 if __name__ == '__main__':
-    hf = HFHandler.start(show=True, clean_plate=Image(conf.clean_plate))
+    hf = HFHandler.start(show=False, clean_plate=Image(Conf().clean_plate()))
     time.sleep(30)
     logger.info('sample: %s' % hf.ask({'a':'A'}))
+
