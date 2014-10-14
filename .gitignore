@@ -1,0 +1,5 @@
+*.py[co]
+.DS_Store
+clean_plate.jpg
+osx_tests.py
+MotionTracker.py

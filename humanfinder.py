@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from SimpleCV import *
-import pykka
 import time
+import pykka
 import collections
 import logging
+from SimpleCV import *
 
 logger = logging
 logger.basicConfig(level=logging.INFO)
@@ -176,8 +176,9 @@ class Conf(object):
     clean_plate_ext = '.jpg'
     scale_y = 0
     scale_x = 0
-    # if more than one cam device give it an index; set w and h
-    camera_args = [1, {"width":960, "height":720}]
+    disp = Display((1600, 1200))
+    # if more than one cam device, set its index; set w and h
+    camera_args = [0, {"width":1600, "height":1200}]
 
     def clean_plate(self):
         return '%s%s' % (self.clean_plate_name, self.clean_plate_ext)
@@ -215,7 +216,8 @@ class HFHandler(pykka.ThreadingActor):
 
 
 if __name__ == '__main__':
-    hf = HFHandler.start(show=False, clean_plate=Image(Conf().clean_plate()))
+    hf = HFHandler.start(show=True, clean_plate=Image(Conf().clean_plate()))
+    # Hax: I don't know why this sleeps for 30s
     time.sleep(30)
+    # Giving it a dummy dict so it doesn't whine
     logger.info('sample: %s' % hf.ask({'a':'A'}))
-
