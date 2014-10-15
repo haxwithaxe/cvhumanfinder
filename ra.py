@@ -25,7 +25,7 @@ class HumansFound(SimpleHTTPServer.SimpleHTTPRequestHandler):
         reply = hf.ask({'sample':0})
         logger.debug('replying: %s' % reply)
         f = StringIO()
-	f.write(json.dumps({'data':reply}))
+        f.write(json.dumps({'data':reply}))
         length = f.tell()
         f.seek(0)
         self.send_response(200)

@@ -27,7 +27,9 @@ class HumanFinder(pykka.ThreadingActor):
         self.max_1_meatbag_area = max_1_meatbag_area/100.0
         self.clean_plate = clean_plate
         self.min_motion_buffer_len = min_motion_buffer_len
+        #print('Instantiate camera object.')
         self.cam = Camera(*Conf().camera_args)
+        #print('Successfully instantiated camera.')
         self.img = None
         self.last_img = None
         self.cm_colors = (Color.RED,(128,0,0),(128,128,0),(0,255,0),(0,128,128),(0,0,128),Color.BLUE)
@@ -176,8 +178,11 @@ class Conf(object):
     clean_plate_ext = '.jpg'
     scale_y = 0
     scale_x = 0
-    disp = Display((1600, 1200))
-    # if more than one cam device, set its index; set w and h
+    # Create display object per forum post about OS X needing it, and a delay following; 
+    # Doesn't solve hang but spawn display window before it hangs
+    #disp = Display((1600, 1200))
+    #sleep(5)
+    # if more than one cam device, set its index; set w and h of Logitec webcam
     camera_args = [0, {"width":1600, "height":1200}]
 
     def clean_plate(self):
@@ -221,3 +226,4 @@ if __name__ == '__main__':
     time.sleep(30)
     # Giving it a dummy dict so it doesn't whine
     logger.info('sample: %s' % hf.ask({'a':'A'}))
+
