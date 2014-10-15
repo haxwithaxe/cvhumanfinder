@@ -2,8 +2,8 @@
 from SimpleCV import *
 import humanfinder
 
-cam = Camera(*humanfinder.Conf().camera_args)
+ccp_cam = Camera(*humanfinder.Conf().camera_args)
 
-img = cam.getImage()
+ccp_img = ccp_cam.getImage()
 
-img.save(open(humanfinder.Conf().clean_plate(), 'w'), temp=False)
+ccp_img.save(open(humanfinder.Conf().clean_plate(), 'w'), temp=False)
