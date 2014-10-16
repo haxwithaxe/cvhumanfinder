@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from SimpleCV import *
+from SimpleCV import Camera
 import humanfinder
 
 ccp_cam = Camera(*humanfinder.Conf().camera_args)
