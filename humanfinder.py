@@ -152,7 +152,8 @@ class HumanFinder(pykka.ThreadingActor):
             logger.debug('big blobs area %%: %s' % str([x.area()/self.img.area() for x in blobs_big]))
             count=0
             for blob in blobs_big:
-                if blob.area() > self.max_1_meatbag_area:
+                logger.debug('human count so far: %d' % count)
+                if blob.area()/self.img.area() > self.max_1_meatbag_area:
                     count+=int((blob.area()/self.img.area())/self.max_1_meatbag_area)
                 else:
                     count+=1
