@@ -4,10 +4,10 @@ import time
 import pykka
 import collections
 import logging
-from SimpleCV import Camera, Image
+from SimpleCV import Camera, Image, Color
 
 logger = logging
-logger.basicConfig(level=logging.INFO)
+logger.basicConfig(level=logging.DEBUG)
 
 class HumanFinder(pykka.ThreadingActor):
     def __init__(self, parent=None, motion=False, clean_plate=None, show=False, blob_min_radius=30, motion_min_radius=30, min_motion_buffer_len=10, max_1_meatbag_area=11):
@@ -21,21 +21,20 @@ class HumanFinder(pykka.ThreadingActor):
         '''
         super(HumanFinder, self).__init__()
         self.parent = parent
-        self.motion_update = motion
+        self.motion_update = motion # TODO: When does this become True?
         self._show = show
         self.blob_min_radius = blob_min_radius
         self.motion_min_radius = motion_min_radius
         self.max_1_meatbag_area = max_1_meatbag_area/100.0
         self.clean_plate = clean_plate
         self.min_motion_buffer_len = min_motion_buffer_len
-        print('Instantiate camera object.')
-        # This try/except hangs silently
+        # print('Instantiating a camera object...')
         try:
-            self.cam = Camera()
+            # self.cam = Camera()
             # self.cam = Camera(0, {'width': 1600, 'height': 1200})
-            # self.cam = Camera(*Conf().camera_args)
-            print('Successfully instantiated camera object')
-        except Error as e:
+            self.cam = Camera(*Conf().camera_args)
+            # print('Successfully instantiated camera object')
+        except Exception as e:
             print('Failed at instantiating the camera.')
             print(str(e))
         self.img = None
@@ -45,14 +44,14 @@ class HumanFinder(pykka.ThreadingActor):
         self.recalibrated_last = int(time.time())
         self.motion_buffer = 0
         self._count_buffer = []
-        self.thread_delay = 1
+        self.thread_delay = 2
         logger.debug('initialized')
 
     def _pre_process_img(self, img):
         ''' do things to the image before sending it through the blob finders '''
-        print('clean_plate.jpg size: %s' % str(self.clean_plate.size()))
-        print ('About to diff greyscaled caps...')
-        logger.debug('pre-processing image: %s, %s' % (img, self.clean_plate))
+        # print('clean_plate.jpg size: %s' % str(self.clean_plate.size()))
+        # print ('About to diff greyscaled caps...')
+        # logger.debug('pre-processing image: %s, %s' % (img, self.clean_plate))
         return (self.clean_plate.grayscale() - img.grayscale())
 
     def getImage(self):
@@ -60,14 +59,13 @@ class HumanFinder(pykka.ThreadingActor):
         logger.debug('getImage')
         # if self.motion_update is True, attempt to get a fresh clean_plate based on conditions
         if self.motion_update:
-            # if self.motion_update
             self.last_img = self.img
-            self.recalibrate()
+        self.recalibrate()
         # otherwise just grab an image from the camera
         i=self.cam.getImage()
         self.img = self._pre_process_img(self.cam.getImage())
         self.show(i)
-        print('Image i size: %s' % str(i.size()))
+        # print('Image i size: %s' % str(i.size()))
         self.img = self._pre_process_img(i)
         logger.debug('getImage')
 
@@ -158,8 +156,10 @@ class HumanFinder(pykka.ThreadingActor):
                 else:
                     count+=1
             logger.info('said "%d" to parent' % count)
-            self.parent.tell({'update':count})
-            logger.debug('meatbags: %d' % count)
+            # Make sure a parent exists
+            if self.parent is not None:
+                self.parent.tell({'update':count})
+                logger.debug('meatbags: %d' % count)
 
     def recalibrate(self):
         if int(time.time()) - self.recalibrated_last > 60*60:
@@ -186,13 +186,16 @@ class Conf(object):
     clean_plate_ext = '.jpg'
     # scale_y = 0
     # scale_x = 0
-    print('Hello, from Conf().')
-    # if more than one cam device, set its index; perhaps set w and h of webcam
-    camera_args = [0, {'width': 1600, 'height': 1200}]
+    # print('Hello, from Conf().')
+    # if more than one cam device, perhaps set its index;
+    # Firewire seems to take first index;
+    # Perhaps also set w and h of webcam
+    #camera_args = [0, {'width': 1600, 'height': 1200}]
+    camera_args = []
     print('Init camera arguments list: %s' % camera_args)
 
     def clean_plate(self):
-        print('Return clean plate filename.')
+        # print('clean_plate() returning "clean_plate.jpg".')
         return '%s%s' % (self.clean_plate_name, self.clean_plate_ext)
 
 
@@ -228,9 +231,11 @@ class HFHandler(pykka.ThreadingActor):
 
 
 if __name__ == '__main__':
-    hf = HFHandler.start(show=False, clean_plate=Image(Conf().clean_plate()))
+    hf = HumanFinder.start(show=False, clean_plate=Image(Conf().clean_plate()))
+    # Original hf was HFHandler but froze on Camera object instantiation
+    #hf = HFHandler.start(show=False, clean_plate=Image(Conf().clean_plate()))
     # Hax doesn't know why this sleeps for 30s. Maybe to account for RPi (moot)
-    # Shortening it to 5s
+    #   shortening it to 5s
     time.sleep(5)
     # Giving it a dummy dict so it doesn't whine
     logger.info('sample: %s' % hf.ask({'a':'A'}))
