@@ -234,9 +234,9 @@ class HFHandler(pykka.ThreadingActor):
 
 if __name__ == '__main__':
     camera = Camera()
-    hf = HumanFinder.start(cam=camera, show=False, clean_plate=Image(Conf().clean_plate()))
+    #hf = HumanFinder.start(cam=camera, show=False, clean_plate=Image(Conf().clean_plate()))
     # Original hf was HFHandler but froze on Camera object instantiation
-    #hf = HFHandler.start(show=False, clean_plate=Image(Conf().clean_plate()))
+    hf = HFHandler.start(cam=camera, show=False, clean_plate=Image(Conf().clean_plate()))
     # Hax doesn't know why this sleeps for 30s. Maybe to account for RPi (moot)
     #   shortening it to 5s
     time.sleep(5)

@@ -3,7 +3,7 @@ import SocketServer
 import sys
 import json
 import logging
-from SimpleCV import Image
+from SimpleCV import Image, Camera
 import humanfinder
 
 try:
@@ -14,7 +14,7 @@ except ImportError:
 PORT = int(sys.argv[1], 10)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('http')
-hf_args = {'show':False, 'clean_plate':Image(humanfinder.Conf().clean_plate)}
+hf_args = {'cam':Camera(),'show':False, 'clean_plate':Image(humanfinder.Conf().clean_plate)}
 hf = humanfinder.HFHandler.start(**hf_args)
 
 class HumansFound(SimpleHTTPServer.SimpleHTTPRequestHandler):
