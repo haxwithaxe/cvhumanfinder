@@ -10,7 +10,7 @@ logger = logging
 logger.basicConfig(level=logging.DEBUG)
 
 class HumanFinder(pykka.ThreadingActor):
-    def __init__(self, parent=None, motion=False, clean_plate=None, show=False, blob_min_radius=30, motion_min_radius=30, min_motion_buffer_len=10, max_1_meatbag_area=11):
+    def __init__(self, parent=None, cam=None, motion=False, clean_plate=None, show=False, blob_min_radius=30, motion_min_radius=30, min_motion_buffer_len=10, max_1_meatbag_area=11):
         '''
         @param  motion                  Boolean, recalibrate based on motion.
         @param  clean_plate             background image to remove the scene background from captured images Default:None
@@ -29,14 +29,15 @@ class HumanFinder(pykka.ThreadingActor):
         self.clean_plate = clean_plate
         self.min_motion_buffer_len = min_motion_buffer_len
         # print('Instantiating a camera object...')
-        try:
+        #try:
             # self.cam = Camera()
             # self.cam = Camera(0, {'width': 1600, 'height': 1200})
-            self.cam = Camera(*Conf().camera_args)
+        #    self.cam = Camera(*Conf().camera_args)
             # print('Successfully instantiated camera object')
-        except Exception as e:
-            print('Failed at instantiating the camera.')
-            print(str(e))
+        #except Exception as e:
+        #    print('Failed at instantiating the camera.')
+        #    print(str(e))
+        self.cam = cam
         self.img = None
         self.last_img = None
         self.cm_colors = (Color.RED,(128,0,0),(128,128,0),(0,255,0),(0,128,128),(0,0,128),Color.BLUE)
@@ -232,7 +233,8 @@ class HFHandler(pykka.ThreadingActor):
 
 
 if __name__ == '__main__':
-    hf = HumanFinder.start(show=False, clean_plate=Image(Conf().clean_plate()))
+    camera = Camera()
+    hf = HumanFinder.start(cam=camera, show=False, clean_plate=Image(Conf().clean_plate()))
     # Original hf was HFHandler but froze on Camera object instantiation
     #hf = HFHandler.start(show=False, clean_plate=Image(Conf().clean_plate()))
     # Hax doesn't know why this sleeps for 30s. Maybe to account for RPi (moot)
