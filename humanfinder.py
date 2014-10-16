@@ -227,7 +227,8 @@ class HFHandler(pykka.ThreadingActor):
             return -1
 
     def append(self, value):
-        self.buff.append(value)
+        if value:    
+            self.buff.append(value)
 
 
 if __name__ == '__main__':

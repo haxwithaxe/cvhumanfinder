@@ -5,7 +5,6 @@ import json
 import logging
 from SimpleCV import Image
 import humanfinder
-from humanfinder import FakeCamera
 
 try:
     from cStringIO import StringIO
@@ -15,7 +14,7 @@ except ImportError:
 PORT = int(sys.argv[1], 10)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('http')
-hf_args = {'show':False, 'clean_plate':Image(humanfinder.conf.clean_plate)}
+hf_args = {'show':False, 'clean_plate':Image(humanfinder.Conf().clean_plate)}
 hf = humanfinder.HFHandler.start(**hf_args)
 
 class HumansFound(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -30,7 +29,7 @@ class HumansFound(SimpleHTTPServer.SimpleHTTPRequestHandler):
         f.seek(0)
         self.send_response(200)
         encoding = 'utf-8'
-        self.send_header("Content-type", "text/html; charset=%s" % encoding)
+        self.send_header("Content-type", "application/json; charset=%s" % encoding)
         self.send_header("Content-Length", str(length))
         self.end_headers()
         if f:
