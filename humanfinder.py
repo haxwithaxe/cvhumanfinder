@@ -61,7 +61,7 @@ class HumanFinder(pykka.ThreadingActor):
         # if self.motion_update is True, attempt to get a fresh clean_plate based on conditions
         if self.motion_update:
             self.last_img = self.img
-        self.recalibrate()
+        #self.recalibrate()
         # otherwise just grab an image from the camera
         i=self.cam.getImage()
         self.img = self._pre_process_img(self.cam.getImage())
@@ -75,8 +75,9 @@ class HumanFinder(pykka.ThreadingActor):
         @returns        True if motion is detected, False if not.
         '''
         logger.debug('seesMotion')
-        diff_blobs = (self.img-self.last_img).findBlobsFromWatershed()
-        return len([x for x in diff_blobs if x.radius() > self.motion_min_radius]) == 0
+        if (self.img is not None and self.last_img is not None):
+            diff_blobs = (self.img - self.last_img).findBlobsFromWatershed()
+            return len([x for x in diff_blobs if x.radius() > self.motion_min_radius]) == 0
 
     def getBlobs(self):
         ''' Get blobs from self.img
@@ -229,7 +230,7 @@ class HFHandler(pykka.ThreadingActor):
             return -1
 
     def append(self, value):
-        if value:    
+        if value:
             self.buff.append(value)
 
 
