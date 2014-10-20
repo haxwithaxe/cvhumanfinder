@@ -9,6 +9,7 @@ from SimpleCV import Camera, Image, Color
 logger = logging
 logger.basicConfig(level=logging.DEBUG)
 
+# previous defaults: blob_min_radius=30; max_1_meatbag_area=11 
 class HumanFinder(pykka.ThreadingActor):
     def __init__(self, parent=None, cam=None, motion=False, clean_plate=None, show=False, blob_min_radius=30, motion_min_radius=30, min_motion_buffer_len=10, max_1_meatbag_area=11):
         '''
@@ -45,7 +46,7 @@ class HumanFinder(pykka.ThreadingActor):
         self.recalibrated_last = int(time.time())
         self.motion_buffer = 0
         self._count_buffer = []
-        self.thread_delay = 2
+        self.thread_delay = 4
         logger.debug('initialized')
 
     def _pre_process_img(self, img):
@@ -57,18 +58,17 @@ class HumanFinder(pykka.ThreadingActor):
 
     def getImage(self):
         ''' Get the image from a camera '''
-        logger.debug('getImage')
+        logger.debug('in getImage()')
         # if self.motion_update is True, attempt to get a fresh clean_plate based on conditions
         if self.motion_update:
             self.last_img = self.img
         #self.recalibrate()
         # otherwise just grab an image from the camera
         i=self.cam.getImage()
-        self.img = self._pre_process_img(self.cam.getImage())
         self.show(i)
-        # print('Image i size: %s' % str(i.size()))
+        self.img = self._pre_process_img(self.cam.getImage())
+        #logger.debug('Image i size: %s' % str(i.size()))
         self.img = self._pre_process_img(i)
-        logger.debug('getImage')
 
     def seesMotion(self):
         ''' Determine if any movement is visible between the last and current image and return True if there is.
@@ -85,7 +85,7 @@ class HumanFinder(pykka.ThreadingActor):
         '''
         magic_threshold = 70
         magic_dialate = 3
-        logger.debug('getBlobs')
+        logger.debug('in getBlobs()')
         mask = self.img.threshold(magic_threshold).dilate(magic_dialate)
         blobs = self.img.findBlobsFromWatershed(mask)
         self.show(blobs)
