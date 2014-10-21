@@ -9,7 +9,7 @@ from SimpleCV import Camera, Image, Color
 logger = logging
 logger.basicConfig(level=logging.DEBUG)
 
-# previous defaults: blob_min_radius=30; max_1_meatbag_area=11 
+# previous defaults: blob_min_radius=30; max_1_meatbag_area=11
 class HumanFinder(pykka.ThreadingActor):
     def __init__(self, parent=None, cam=None, motion=False, clean_plate=None, show=False, blob_min_radius=400, motion_min_radius=30, min_motion_buffer_len=10, max_1_meatbag_area=11):
         '''
@@ -62,13 +62,13 @@ class HumanFinder(pykka.ThreadingActor):
         # if self.motion_update is True, attempt to get a fresh clean_plate based on conditions
         if self.motion_update:
             self.last_img = self.img
-        #self.recalibrate()
+            #self.recalibrate()
         # otherwise just grab an image from the camera
-        i=self.cam.getImage()
+        i = self.cam.getImage()
+        #self.img = self._pre_process_img(self.cam.getImage())
         self.show(i)
-        self.img = self._pre_process_img(self.cam.getImage())
-        #logger.debug('Image i size: %s' % str(i.size()))
         self.img = self._pre_process_img(i)
+        #logger.debug('Image i size: %s' % str(i.size()))
 
     def seesMotion(self):
         ''' Determine if any movement is visible between the last and current image and return True if there is.
