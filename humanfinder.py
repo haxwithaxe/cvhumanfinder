@@ -46,7 +46,7 @@ class HumanFinder(pykka.ThreadingActor):
         self.recalibrated_last = int(time.time())
         self.motion_buffer = 0
         self._count_buffer = []
-        self.thread_delay = 4
+        self.thread_delay = 1 
         logger.debug('initialized')
 
     def _pre_process_img(self, img):
