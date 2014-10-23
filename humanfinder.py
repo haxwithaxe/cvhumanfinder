@@ -139,6 +139,7 @@ class HumanFinder(pykka.ThreadingActor):
             self.getImage()
             # find blobs
             blobs = self.getBlobs()
+            # Should 0.80 be max_1_meatbag_area?
             blobs_big = [x for x in blobs if x.radius() > self.blob_min_radius and x.area()/self.img.area() < 0.80]
             if blobs_big:
                 # make color map
