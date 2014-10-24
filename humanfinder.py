@@ -11,7 +11,7 @@ logger.basicConfig(level=logging.DEBUG)
 
 # previous defaults: blob_min_radius=30; max_1_meatbag_area=11
 class HumanFinder(pykka.ThreadingActor):
-    def __init__(self, parent=None, cam=None, motion=False, clean_plate=None, show=False, blob_min_radius=400, motion_min_radius=30, min_motion_buffer_len=10, max_1_meatbag_area=11):
+    def __init__(self, parent=None, cam=None, motion=False, clean_plate=None, show=False, blob_min_radius=150, motion_min_radius=30, min_motion_buffer_len=10, max_1_meatbag_area=11):
         '''
         @param  motion                  Boolean, recalibrate based on motion.
         @param  clean_plate             background image to remove the scene background from captured images Default:None
@@ -46,7 +46,7 @@ class HumanFinder(pykka.ThreadingActor):
         self.recalibrated_last = int(time.time())
         self.motion_buffer = 0
         self._count_buffer = []
-        self.thread_delay = 1 
+        self.thread_delay = 1
         logger.debug('initialized')
 
     def _pre_process_img(self, img):
