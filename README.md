@@ -1,3 +1,10 @@
 # CV Human Finder
 
-### Prototypes toward a SimpleCV application
+written by haxwithaxe and nootrope
+Licensed under GNU GPL v3
+
+### Requires
+* Python 2.7+
+* SimpleCV
+* webcam
+
