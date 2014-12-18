@@ -1,6 +1,10 @@
 # CV Human Finder
+## CV human finder based on blobs rather than Harr classifiers
 
-written by haxwithaxe and nootrope
+[Github repository](https://github.com/haxwithaxe/cvhumanfinder.git)
+
+Written by haxwithaxe and nootrope
+
 Licensed under GNU GPL v3
 
 ### Requires
